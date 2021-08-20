@@ -10,6 +10,8 @@ const width = window.innerWidth;
 const max_vel = 5;
 const acc = 0.2;
 
+size = 35;
+
 console.log(height)
 console.log(width)
 
@@ -19,9 +21,9 @@ var character = {
     xvelocity: 0,
     yvelocity: 0,
     place: function () {
-        var img = new Image(35, 35)
+        var img = new Image(size, size)
         img.src = "character.png";
-        img.style = "position: absolute; left: " + width/2 + "px; top:" + height/2 + "px";
+        img.style = "position: absolute; left: " + (width/2 - size/2) + "px; top:" + (height/2 - size/2) + "px";
         document.body.appendChild(img);
     }
 }
@@ -37,44 +39,13 @@ var items = [];
 
 var itemTypes = [
     {
-        name: "rock",
-        src: "rocks.png",
+        name: "rainbow",
+        src: "rainbow.png",
         interact: function () {
-            return null;
-        }
-    }, 
-    {
-        name: "grass", 
-        src: "grass.png",
-        interact: function () {
-            return null;
+            size += 5;
         }
     }
 ]
-
-/*
-document.addEventListener("keydown", (bort) => {
-    console.log(bort)
-
-    if (bort.code == "ArrowLeft") {
-        if (Math.abs(character.xvelocity) <= max_vel) {
-            character.xvelocity += -acc;
-        }
-    } else if (bort.code == "ArrowRight") {
-        if (Math.abs(character.xvelocity) <= max_vel) {
-            character.xvelocity += +acc;
-        }
-    } else if (bort.code == "ArrowDown") {
-        if (Math.abs(character.yvelocity) <= max_vel) {
-            character.yvelocity += +acc;
-        }
-    } else if (bort.code == "ArrowUp") {
-        if (Math.abs(character.yvelocity) <= max_vel) {
-            character.yvelocity += -acc;
-        }
-    } 
-});
-*/
 
 document.addEventListener("keydown", function (bort) {
     if (bort.code == "ArrowUp") {
@@ -119,17 +90,6 @@ function seedItems () {
             itemType: 0
         })
     }
-
-    for (let i = 0; i < 100; i++) {
-        let x = Math.floor(Math.random() * 5000) - 2500;
-        let y = Math.floor(Math.random() * 5000) - 2500;
-
-        items.push({
-            xpos: x,
-            ypos: y,
-            itemType: 1
-        })
-    }
 }
 
 function loop () {
@@ -142,6 +102,7 @@ function loop () {
     resist();
     placeItems();
     character.place();
+    action();
 
     window.requestAnimationFrame(loop);
 }
@@ -172,7 +133,7 @@ function resist () {
 // Places the items on the map
 function placeItems() {
     items.forEach(element => {
-        if (/*isInScreen(element.xpos, element.ypos)*/ true) {
+        if (isInScreen(element.xpos, element.ypos)) {
             
             var img = new Image(25, 25);
             img.src = itemTypes[element.itemType].src;
@@ -202,7 +163,7 @@ function isInScreen (xpos, ypos) {
     }
 
 
-    if (ypos + 200 > character.ypos - height/2 && ypos < character.ypos + height/2) {
+    if (-ypos - topLeft()[1] > 0 && -ypos - topLeft()[1] < height) {
         var withinY = true;
     } else {
         var withinY = false;
@@ -228,4 +189,13 @@ function move () {
     } else if (controls.right && Math.abs(character.xvelocity) <= max_vel) {
         character.xvelocity += acc;
     }
+}
+
+function action () {
+    items.forEach((item, i) => {
+        if (Math.abs(item.ypos + character.ypos) < size && Math.abs(item.xpos - character.xpos) < size) {
+            size += 5;
+            items.splice(i, 1);
+        }
+    })
 }
